@@ -60,7 +60,7 @@ public class UserService {
     }
 
 
-    public ResponseEntity<Void> createUser(User user) {
+    public ResponseEntity<String> createUser(User user) {
 
         passwordMapper.setValue(user.getPassword());
         userRepresentation.setUsername(user.getUserName());
@@ -75,17 +75,15 @@ public class UserService {
 
         try {
             Response response = usersResource.create(userRepresentation);
-
-            if (response.getStatus() == 201) {
-                String userId = CreatedResponseUtil.getCreatedId(response);
-                log.info("User created successfully");
-                return new ResponseEntity<>(HttpStatus.CREATED);
+            if (response.getStatus() != 201) {
+                System.err.println("Failed to create user: " + response.getStatusInfo());
+                return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
             }
+            log.info("user created");
+            return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (Exception ex) {
             throw new CustomException(ex.getMessage(), ex.getCause());
         }
-        ;
-        throw new CustomException("user representation is not correct or duplicated");
     }
 
     public List<UserRepresentation> getUser(String userName){
@@ -93,23 +91,39 @@ public class UserService {
     }
 
     public void updateUser(String userId, User userDTO) {
-        UserRepresentation user = modelMapper.map(userDTO, UserRepresentation.class);
-        usersResource.get(userId).update(user);
+        try {
+            UserRepresentation user = modelMapper.map(userDTO, UserRepresentation.class);
+            usersResource.get(userId).update(user);
+        }catch (Exception ex) {
+            throw new CustomException(ex.getMessage(), ex.getCause());
+        }
     }
 
     public void deleteUser(String userId){
-        usersResource.get(userId)
-                .remove();
+        try {
+            usersResource.get(userId)
+                    .remove();
+        }catch (Exception ex) {
+            throw new CustomException(ex.getMessage(), ex.getCause());
+        }
     }
 
     public void sendVerificationLink(String userId){
-        usersResource.get(userId)
-                .sendVerifyEmail();
+        try {
+            usersResource.get(userId)
+                    .sendVerifyEmail();
+        }catch (Exception ex){
+            throw new CustomException(ex.getMessage(), ex.getCause());
+        }
     }
 
     public void sendResetPassword(String userId){
-        usersResource.get(userId)
-                .executeActionsEmail(List.of("UPDATE_PASSWORD"));
+        try {
+            usersResource.get(userId)
+                    .executeActionsEmail(List.of("UPDATE_PASSWORD"));
+        }catch (Exception ex){
+            throw new CustomException(ex.getMessage(), ex.getCause());
+        }
     }
 
     public ResponseEntity<?> signIn(LoginDTO loginDTO) {
