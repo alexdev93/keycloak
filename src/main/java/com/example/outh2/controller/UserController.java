@@ -1,7 +1,7 @@
 package com.example.outh2.controller;
 
 import com.example.outh2.model.LoginDTO;
-import com.example.outh2.model.User;
+import com.example.outh2.model.UserEntity;
 import com.example.outh2.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -20,13 +20,13 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping(path = "/get-users")
-    public List<User> getUsers() {
+    public List<UserEntity> getUsers() {
         return userService.getUsers();
     }
 
     @ResponseBody
     @PostMapping(path = "/create")
-    public ResponseEntity<?> createUser(@RequestBody User user) {
+    public ResponseEntity<?> createUser(@RequestBody UserEntity user) {
         return userService.createUser(user);
     }
 
@@ -36,7 +36,7 @@ public class UserController {
     }
 
     @PutMapping(path = "/update/{userId}")
-    public String updateUser(@PathVariable("userId") String userId, @RequestBody User userDTO) {
+    public String updateUser(@PathVariable("userId") String userId, @RequestBody UserEntity userDTO) {
         userService.updateUser(userId, userDTO);
         return "User Details Updated Successfully.";
     }

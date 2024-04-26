@@ -1,6 +1,20 @@
 spring:
   application:
     name: oauth2
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/pdb
+    username: admin
+    password: admin
+    driver-class-name: org.postgresql.Driver
+    jpa:
+      hibernate:
+        ddl-auto: update
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.PostgreSQLDialect
+          format_sql: true
+
   security:
     oauth2:
       client:
@@ -9,7 +23,7 @@ spring:
             client-id: fairflow
             scope: openid
             authorization-grant-type: authorization_code
-            redirect-uri: http://localhost:8081/api
+            redirect-uri: http://localhost:8080/api
         provider:
           keycloak:
             user-name-attribute: preferred_username
@@ -19,7 +33,7 @@ keycloak:
   url: http://localhost:9090
   client:
     id: fairflow
-    secret: mM0E07pZOxCKkYICMWfIhGp74vs0Z96f
+    secret: HqMrqO0Ax6cd0WzmHbXGs0rNmHyDYrcX
   username: admin
   password: admin
   realm: safari

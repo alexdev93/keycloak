@@ -6,6 +6,10 @@ services:
       POSTGRES_PASSWORD: admin
       POSTGRES_USER: admin
       POSTGRES_DB: pdb
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - keycloak_network
 
@@ -22,8 +26,14 @@ services:
       - 9090:8080
     command:
       - start-dev
+    volumes:
+      - keycloak_data:/opt/jboss/keycloak/standalone/data
     networks:
       - keycloak_network
+
+volumes:
+  postgres_data:
+  keycloak_data:
 
 networks:
   keycloak_network:

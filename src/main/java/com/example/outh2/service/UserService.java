@@ -2,10 +2,11 @@ package com.example.outh2.service;
 
 import com.example.outh2.exception.CustomException;
 import com.example.outh2.model.LoginDTO;
-import com.example.outh2.model.User;
+import com.example.outh2.model.UserEntity;
+import com.example.outh2.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.admin.client.CreatedResponseUtil;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -24,10 +25,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserService {
 
@@ -43,11 +44,11 @@ public class UserService {
     @Value("${keycloak.client.secret}")
     private String clientSecret;
 
-    public List<User> getUsers() {
+    public List<UserEntity> getUsers() {
         List<UserRepresentation> userRepresentations = usersResource.list();
-        List<User> userList = new ArrayList<>();
+        List<UserEntity> userList = new ArrayList<>();
         for (UserRepresentation userRep : userRepresentations) {
-            User user = new User();
+            UserEntity user = new UserEntity();
             user.setUserName(userRep.getUsername());
             user.setEmail(userRep.getEmail());
             user.setFirstName(userRep.getFirstName());
@@ -60,7 +61,7 @@ public class UserService {
     }
 
 
-    public ResponseEntity<String> createUser(User user) {
+    public ResponseEntity<String> createUser(UserEntity user) {
 
         passwordMapper.setValue(user.getPassword());
         userRepresentation.setUsername(user.getUserName());
@@ -90,7 +91,7 @@ public class UserService {
         return usersResource.search(userName, true);
     }
 
-    public void updateUser(String userId, User userDTO) {
+    public void updateUser(String userId, UserEntity userDTO) {
         try {
             UserRepresentation user = modelMapper.map(userDTO, UserRepresentation.class);
             usersResource.get(userId).update(user);
