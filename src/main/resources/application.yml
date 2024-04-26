@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: oauth2
+
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: fairflow
+            scope: openid
+            authorization-grant-type: authorization_code
+            redirect-uri: http://localhost:8081/api
+        provider:
+          keycloak:
+            user-name-attribute: preferred_username
+            issuer-uri: http://localhost:8080/realms/safari
+
+server:
+  port: 8081
+
+
+keycloak:
+  url: http://localhost:8080
+  client:
+    id: fairflow
+    secret: SqqoTyrdOH1tKD8EsZ2mSjwV9DxDhLcX
+  username: alex123
+  password: pass123
+  realm: safari
+

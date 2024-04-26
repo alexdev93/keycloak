@@ -1,6 +1,7 @@
 package com.example.outh2.config;
 
 
+import com.example.outh2.exception.AuthEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -8,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
@@ -64,21 +66,28 @@ class SecurityConfig {
 
     @Bean
     public SecurityFilterChain resourceServerFilterChain(HttpSecurity http) throws Exception {
-        http
+      return http
                 .cors(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(new AntPathRequestMatcher("api/customers*"))
                         .hasRole("user")
-                        .requestMatchers("api/welcome", "api", "api/login", "api/create", "api/get")
+                        .requestMatchers("api/welcome", "api", "api/login", "api/create")
                         .permitAll()
                         .anyRequest()
                         .authenticated())
                 .oauth2ResourceServer((oauth2) -> oauth2
                         .jwt(Customizer.withDefaults()))
-                .oauth2Login(Customizer.withDefaults());
-        return http.build();
+                .oauth2Login(Customizer.withDefaults())
+                .exceptionHandling(handling -> handling.authenticationEntryPoint(authenticationEntryPoint()))
+                .build();
     }
+
+    @Bean
+    AuthEntryPoint authenticationEntryPoint() {
+        return new AuthEntryPoint();
+    }
+
 
     @Bean
     public GrantedAuthoritiesMapper userAuthoritiesMapperForKeycloak() {

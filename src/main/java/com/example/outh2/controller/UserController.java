@@ -11,8 +11,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
+import javax.ws.rs.core.Response;
 import java.util.List;
 
 @RestController
@@ -28,46 +28,15 @@ public class UserController {
         return userService.getUsers();
     }
 
+    @ResponseBody
     @PostMapping(path = "/create")
-    public void createUser() {
-
-        userService.createUser();
-//         String res = webClient.post()
-//                .uri("http://localhost:8080/admin/realms/safari/users")
-//                 .header(HttpHeaders.AUTHORIZATION, authorizationHeader)
-//                 .contentType(MediaType.APPLICATION_JSON)
-//                 .body(BodyInserters.fromValue(userDTO))
-//                 .retrieve()
-//                 .bodyToMono(String.class)
-//                 .block();
-
-//        return ResponseEntity.ok(res);
+    public ResponseEntity<?> createUser(@RequestBody User user) {
+        return userService.createUser(user);
     }
 
-    @PostMapping(path = "/login")
     @ResponseBody
-    public Mono<ResponseEntity<String>> login(@RequestBody LoginDTO loginDto) {
-        String username = loginDto.getUsername();
-        String password = loginDto.getPassword();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("client_id", "fairflow");
-        body.add("client_secret", "SqqoTyrdOH1tKD8EsZ2mSjwV9DxDhLcX");
-        body.add("username", username);
-        body.add("password", password);
-        body.add("grant_type", "password");
-
-        return webClient
-                .post()
-                .uri("http://localhost:8080/realms/safari/protocol/openid-connect/token")
-                .headers(h -> h.addAll(headers))
-                .body(BodyInserters.fromFormData(body))
-                .retrieve()
-                .toEntity(String.class);
-//                .block();
-
+    @PostMapping(path = "/login")
+    public ResponseEntity<?> login(@RequestBody LoginDTO loginDto) {
+    return userService.signIn(loginDto);
     }
 }
