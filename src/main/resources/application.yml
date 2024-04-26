@@ -1,7 +1,6 @@
 spring:
   application:
     name: oauth2
-
   security:
     oauth2:
       client:
@@ -14,18 +13,14 @@ spring:
         provider:
           keycloak:
             user-name-attribute: preferred_username
-            issuer-uri: http://localhost:8080/realms/safari
-
-server:
-  port: 8081
-
+            issuer-uri: http://localhost:9090/realms/safari
 
 keycloak:
-  url: http://localhost:8080
+  url: http://localhost:9090
   client:
     id: fairflow
-    secret: SqqoTyrdOH1tKD8EsZ2mSjwV9DxDhLcX
-  username: admin123
+    secret: mM0E07pZOxCKkYICMWfIhGp74vs0Z96f
+  username: admin
   password: admin
   realm: safari
 

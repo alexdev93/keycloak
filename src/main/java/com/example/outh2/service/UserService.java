@@ -140,7 +140,7 @@ public class UserService {
 
         return webClient
                 .post()
-                .uri("http://localhost:8080/realms/safari/protocol/openid-connect/token")
+                .uri("http://localhost:9090/realms/safari/protocol/openid-connect/token")
                 .headers(h -> h.addAll(headers))
                 .body(BodyInserters.fromFormData(body))
                 .retrieve()

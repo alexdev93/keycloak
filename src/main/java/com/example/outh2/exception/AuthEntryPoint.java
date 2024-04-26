@@ -17,7 +17,7 @@ public class AuthEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
                          org.springframework.security.core.AuthenticationException e) throws IOException {
-        ResponseEntity<String> responseEntity = new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        ResponseEntity<String> responseEntity = new ResponseEntity<>( e.getLocalizedMessage(), HttpStatus.UNAUTHORIZED);
         OutputStream out = httpServletResponse.getOutputStream();
         ObjectMapper mapper = new ObjectMapper();
         mapper.writeValue(out, responseEntity);
