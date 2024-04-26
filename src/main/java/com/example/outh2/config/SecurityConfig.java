@@ -70,7 +70,7 @@ class SecurityConfig {
                 .cors(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(new AntPathRequestMatcher("api/customers*"))
+                        .requestMatchers("api/customers*")
                         .hasRole("user")
                         .requestMatchers("api/welcome", "api", "api/login", "api/create")
                         .permitAll()

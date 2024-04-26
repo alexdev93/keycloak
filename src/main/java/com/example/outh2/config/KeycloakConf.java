@@ -2,14 +2,17 @@ package com.example.outh2.config;
 
 import lombok.Data;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.UsersResource;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
-@Component
-@Data
-public class Keycloak {
+@Configuration
+public class KeycloakConf {
 
     @Value("${keycloak.url}")
     private String serverUrl;
@@ -29,7 +32,8 @@ public class Keycloak {
     @Value("${keycloak.realm}")
     private String realm;
 
-    public org.keycloak.admin.client.Keycloak getAdminKeycloakUser() {
+    @Bean
+    public Keycloak getAdminKeycloakUser() {
         return KeycloakBuilder.builder().serverUrl(serverUrl)
                 .grantType("password").realm(realm)
                 .clientId(clientId)
@@ -39,7 +43,13 @@ public class Keycloak {
                 .resteasyClient(new ResteasyClientBuilder().connectionPoolSize(10).build()).build();
     }
 
-    public RealmResource getRealm() {
+    @Bean
+    public RealmResource getRealmResource() {
         return getAdminKeycloakUser().realm(realm);
+    }
+
+    @Bean
+    public UsersResource usersResource(){
+        return getRealmResource().users();
     }
 }

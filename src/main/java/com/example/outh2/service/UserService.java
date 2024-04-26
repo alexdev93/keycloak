@@ -1,14 +1,16 @@
 package com.example.outh2.service;
 
-import com.example.outh2.config.Keycloak;
 import com.example.outh2.exception.CustomException;
 import com.example.outh2.model.LoginDTO;
 import com.example.outh2.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.CreatedResponseUtil;
+import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,16 +24,40 @@ import org.springframework.web.reactive.function.client.WebClient;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
-    private final Keycloak keycloak;
     private final UserRepresentation userRepresentation;
     private final CredentialRepresentation passwordMapper;
     private final WebClient webClient;
+    private final ModelMapper modelMapper;
+    private final UsersResource usersResource;
+
+    @Value("${keycloak.client.id}")
+    private String clientId;
+
+    @Value("${keycloak.client.secret}")
+    private String clientSecret;
+
+    public List<User> getUsers() {
+        List<UserRepresentation> userRepresentations = usersResource.list();
+        List<User> userList = new ArrayList<>();
+        for (UserRepresentation userRep : userRepresentations) {
+            User user = new User();
+            user.setUserName(userRep.getUsername());
+            user.setEmail(userRep.getEmail());
+            user.setFirstName(userRep.getFirstName());
+            user.setLastName(userRep.getLastName());
+            user.setId(userRep.getId());
+            // You should add the 'user' object to the list
+            userList.add(user);
+        }
+        return userList;
+    }
 
 
     public ResponseEntity<Void> createUser(User user) {
@@ -47,28 +73,53 @@ public class UserService {
         roles.add("user");
         userRepresentation.setRealmRoles(roles);
 
-        try{
-            Response response = keycloak.getRealm().users().create(userRepresentation);
+        try {
+            Response response = usersResource.create(userRepresentation);
 
             if (response.getStatus() == 201) {
                 String userId = CreatedResponseUtil.getCreatedId(response);
                 log.info("User created successfully");
                 return new ResponseEntity<>(HttpStatus.CREATED);
             }
-        }catch (Exception ex) {
+        } catch (Exception ex) {
             throw new CustomException(ex.getMessage(), ex.getCause());
-        };
+        }
+        ;
         throw new CustomException("user representation is not correct or duplicated");
     }
 
-    public ResponseEntity<?> signIn(LoginDTO loginDTO){
+    public List<UserRepresentation> getUser(String userName){
+        return usersResource.search(userName, true);
+    }
+
+    public void updateUser(String userId, User userDTO) {
+        UserRepresentation user = modelMapper.map(userDTO, UserRepresentation.class);
+        usersResource.get(userId).update(user);
+    }
+
+    public void deleteUser(String userId){
+        usersResource.get(userId)
+                .remove();
+    }
+
+    public void sendVerificationLink(String userId){
+        usersResource.get(userId)
+                .sendVerifyEmail();
+    }
+
+    public void sendResetPassword(String userId){
+        usersResource.get(userId)
+                .executeActionsEmail(List.of("UPDATE_PASSWORD"));
+    }
+
+    public ResponseEntity<?> signIn(LoginDTO loginDTO) {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("client_id", keycloak.getClientId());
-        body.add("client_secret", keycloak.getClientSecret());
+        body.add("client_id", clientId);
+        body.add("client_secret", clientSecret);
         body.add("username", loginDTO.getUsername());
         body.add("password", loginDTO.getPassword());
         body.add("grant_type", "password");
@@ -83,7 +134,4 @@ public class UserService {
                 .block();
     }
 
-    public List<UserRepresentation> getUsers() {
-        return keycloak.getRealm().users().list();
-    }
 }

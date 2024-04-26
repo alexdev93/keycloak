@@ -25,7 +25,7 @@ keycloak:
   client:
     id: fairflow
     secret: SqqoTyrdOH1tKD8EsZ2mSjwV9DxDhLcX
-  username: alex123
-  password: pass123
+  username: admin123
+  password: admin
   realm: safari
 
